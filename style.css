@@ -1,0 +1,13 @@
+.gameName{
+    color: #fff;
+    font-family: "Arial";
+    font-size: 27px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+canvas{
+    position: absolute;
+    top: 70px;
+    left: 300px;
+}
