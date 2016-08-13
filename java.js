@@ -105,18 +105,27 @@ Ball.prototype.draw = function () {
 }
 
 Ball.prototype.update = function () {
-    if (player2.drawY-10 < this.drawY && player2.drawY + 10 + player2.height > this.drawY && player2.drawX - player2.width/2-3 <= this.drawX) {
+    if (player2.drawY - 10 < this.drawY && player2.drawY + 10 + player2.height > this.drawY && player2.drawX - player2.width / 2 - 3 <= this.drawX) {
         this.dir = "LEFT";
     }
-    if (player1.drawY -10 < this.drawY && player1.drawY +10 + player1.height > this.drawY && player1.drawX + player1.width + 10 >= this.drawX) {
+    if (player1.drawY - 10 < this.drawY && player1.drawY + 10 + player1.height > this.drawY && player1.drawX + player1.width + 10 >= this.drawX) {
         this.dir = "RIGHT";
     }
-    if (this.drawX > canvasWidth){
+    if (this.drawX > canvasWidth) {
         this.dir = "STOP2";
     }
-    if (this.drawX < 0){
+    if (this.drawX < 0) {
         this.dir = "STOP1"
     }
+    if (this.isSpace) {
+        if (this.dir == "STOP1") {
+            this.dir = "RIGHT";
+        }
+        if (this.dir == "STOP2") {
+            this.dir = "LEFT";
+        }
+    }
+
     this.BallMoove();
 }
 
@@ -224,6 +233,7 @@ function Ball() {
     this.speed = 3;
     //direction
     this.dir = "RIGHT";
+    this.isSpace = false;
 }
 
 //Clear functions
@@ -259,6 +269,11 @@ function checkKeyDown(e) {
         player2.isDown = true;
         e.preventDefault();
     }
+
+    if (keyID == 32){
+        ball.isSpace = true;
+        e.preventDefault();
+    }
 }
 
 function checkKeyUp(e) {
@@ -279,6 +294,10 @@ function checkKeyUp(e) {
     }
     if (keyID == 40){
         player2.isDown = false;
+        e.preventDefault();
+    }
+    if (keyID == 32){
+        ball.isSpace = false;
         e.preventDefault();
     }
 }
