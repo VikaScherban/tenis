@@ -111,12 +111,26 @@ Ball.prototype.update = function () {
     if (player1.drawY -10 < this.drawY && player1.drawY +10 + player1.height > this.drawY && player1.drawX + player1.width + 10 >= this.drawX) {
         this.dir = "RIGHT";
     }
+    if (this.drawX > canvasWidth){
+        this.dir = "STOP2";
+    }
+    if (this.drawX < 0){
+        this.dir = "STOP1"
+    }
     this.BallMoove();
 }
 
 Ball.prototype.BallMoove= function () {
     if (this.dir == "RIGHT")this.drawX += this.speed;
     if (this.dir == "LEFT") this.drawX -= this.speed;
+    if (this.dir == "STOP1") {
+        this.drawX = player1.width +14;
+        this.drawY = player1.drawY + player1.height/2;
+    }
+    if (this.dir == "STOP2") {
+        this.drawX = canvasWidth - player2.width - 14;
+        this.drawY = player2.drawY + player2.height/2;
+    }
 }
 
 Player1.prototype.draw = function () {
@@ -150,6 +164,16 @@ Player1.prototype.chooseDir =function () {
     if (this.isDown) {
         this.drawY +=this.speed;
     }
+    if (ball.dir == "STOP1") {
+        if (this.isUp) {
+            this.drawY -= this.speed;
+            ball.drawY -= this.speed;
+        }
+        if (this.isDown) {
+            this.drawY += this.speed;
+            ball.drawY += this.speed;
+        }
+    }
 }
 
 Player2.prototype.chooseDir = function () {
@@ -158,6 +182,17 @@ Player2.prototype.chooseDir = function () {
     }
     if (this.isDown) {
         this.drawY +=this.speed;
+    }
+
+    if (ball.dir == "STOP2") {
+        if (this.isUp) {
+            this.drawY -= this.speed;
+            ball.drawY -= this.speed;
+        }
+        if (this.isDown) {
+            this.drawY += this.speed;
+            ball.drawY += this.speed;
+        }
     }
 }
 //Game Objects
