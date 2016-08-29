@@ -14,7 +14,7 @@ var ball;
 var isPlaying;
 
 var board = new Image();
-board.src = "board.jpg";
+board.src = "images/board.jpg";
 
 var requestAnimFrame = window.requestAnimationFrame ||
     window.webkitRequestAnimationFrame ||
@@ -46,7 +46,7 @@ function init() {
     this.player2canvas.width = this.canvasWidth;
     this.player2canvas.height = this.canvasHeight;
 
-// context
+    //context
     context = this.canvas.getContext('2d');
     ballctx = this.ballcanvas.getContext('2d');
     ctxPlayer1 = this.player1canvas.getContext('2d');
@@ -60,7 +60,6 @@ function init() {
 
     startLoop();
 
-    //moove player1
     document.addEventListener("keydown", checkKeyDown, false);
     document.addEventListener("keyup", checkKeyUp, false);
 }
@@ -105,11 +104,14 @@ Ball.prototype.draw = function () {
 }
 
 Ball.prototype.update = function () {
-    if (player2.drawY - 10 < this.drawY && player2.drawY + 10 + player2.height > this.drawY && player2.drawX - player2.width / 2 - 3 <= this.drawX) {
-        this.dir = "LEFT";
+    if (player2.drawY - 10 < this.drawY && player2.drawY + 10 + player2.height > this.drawY && player2.drawX - player2.width / 2 - 3 <= this.drawX){
+         this.xspeed = -this.xspeed;
+         this.yspeed = -this.yspeed;
+
     }
     if (player1.drawY - 10 < this.drawY && player1.drawY + 10 + player1.height > this.drawY && player1.drawX + player1.width + 10 >= this.drawX) {
-        this.dir = "RIGHT";
+        this.xspeed = -this.xspeed;
+        this.yspeed = -this.yspeed;
     }
     if (this.drawX > canvasWidth) {
         this.dir = "STOP2";
@@ -119,19 +121,32 @@ Ball.prototype.update = function () {
     }
     if (this.isSpace) {
         if (this.dir == "STOP1") {
-            this.dir = "RIGHT";
+            this.dir = "MOVE";
+            this.xspeed = -this.xspeed;
+            this.yspeed = -this.yspeed;
         }
         if (this.dir == "STOP2") {
-            this.dir = "LEFT";
+            this.dir = "MOVE";
+            this.xspeed = -this.xspeed;
+            this.yspeed = -this.yspeed;
         }
     }
-
-    this.BallMoove();
+    //удар об нижню стінку
+    if (this.drawY>canvasHeight) {
+        this.yspeed = -this.yspeed;
+    }
+    //удар об верхню стінку
+    if (this.drawY<0){
+        this.yspeed = -this.yspeed;
+    }
+    this.BallMove();
 }
 
-Ball.prototype.BallMoove= function () {
-    if (this.dir == "RIGHT")this.drawX += this.speed;
-    if (this.dir == "LEFT") this.drawX -= this.speed;
+Ball.prototype.BallMove= function () {
+    if (this.dir == "MOVE") {
+        this.drawX = this.drawX + this.xspeed;
+        this.drawY = this.drawY + this.yspeed;
+    }
     if (this.dir == "STOP1") {
         this.drawX = player1.width +14;
         this.drawY = player1.drawY + player1.height/2;
@@ -140,7 +155,9 @@ Ball.prototype.BallMoove= function () {
         this.drawX = canvasWidth - player2.width - 14;
         this.drawY = player2.drawY + player2.height/2;
     }
+
 }
+
 
 Player1.prototype.draw = function () {
     clearPlayer1Ctx();
@@ -173,16 +190,6 @@ Player1.prototype.chooseDir =function () {
     if (this.isDown) {
         this.drawY +=this.speed;
     }
-    if (ball.dir == "STOP1") {
-        if (this.isUp) {
-            this.drawY -= this.speed;
-            ball.drawY -= this.speed;
-        }
-        if (this.isDown) {
-            this.drawY += this.speed;
-            ball.drawY += this.speed;
-        }
-    }
 }
 
 Player2.prototype.chooseDir = function () {
@@ -193,21 +200,11 @@ Player2.prototype.chooseDir = function () {
         this.drawY +=this.speed;
     }
 
-    if (ball.dir == "STOP2") {
-        if (this.isUp) {
-            this.drawY -= this.speed;
-            ball.drawY -= this.speed;
-        }
-        if (this.isDown) {
-            this.drawY += this.speed;
-            ball.drawY += this.speed;
-        }
-    }
 }
 //Game Objects
 function Player1() {
     this.drawX = 0;
-    this.drawY = 0;
+    this.drawY = canvasHeight/2 - 50;
     this.width = 20;
     this.height = 100;
     this.speed = 5;
@@ -217,7 +214,7 @@ function Player1() {
 }
 function Player2() {
     this.drawX = 780;
-    this.drawY = 0;
+    this.drawY = canvasHeight/2 -50;
     this.width = 20;
     this.height = 100;
     this.speed = 5;
@@ -227,12 +224,14 @@ function Player2() {
 }
 
 function Ball() {
-    this.drawX = canvasWidth/2 - 10;
-    this.drawY = canvasHeight/2 - 10;
+    this.drawX = 0;
+    this.drawY = 0;
     this.radius = 10;
     this.speed = 3;
+    this.xspeed = 3;
+    this.yspeed = 5;
     //direction
-    this.dir = "RIGHT";
+    this.dir = "MOVE";
     this.isSpace = false;
 }
 
