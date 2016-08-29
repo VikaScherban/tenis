@@ -10,6 +10,12 @@ var ctxPlayer2;
 var player1;
 var player2;
 var ball;
+var game;
+var winscore = 3;
+//очки
+var score1 = 0;
+var score2 = 0;
+var prevDir;
 
 var isPlaying;
 
@@ -23,7 +29,7 @@ var requestAnimFrame = window.requestAnimationFrame ||
     window.msRequestAnimationFrame;
 
 function init() {
-    // create canvas
+    // створення фону
     this.canvas = document.createElement('canvas');
     document.body.appendChild(this.canvas);
 
@@ -57,6 +63,7 @@ function init() {
     player1 = new Player1();
     player2 = new Player2();
     ball = new Ball();
+    game = new Game();
 
     startLoop();
 
@@ -65,15 +72,15 @@ function init() {
 }
 
 function loop() {
+    game.update();
     if (isPlaying) {
         draw();
         update();
-        requestAnimFrame(loop);
     }
+    requestAnimFrame(loop);
 }
 
 function startLoop() {
-    isPlaying = true;
     loop();
 }
 
@@ -81,6 +88,7 @@ function draw() {
     ball.draw();
     player1.draw();
     player2.draw();
+    drawScore();
 }
 
 function update() {
@@ -104,20 +112,29 @@ Ball.prototype.draw = function () {
 }
 
 Ball.prototype.update = function () {
+    //відбиття від другого плеєра
     if (player2.drawY - 10 < this.drawY && player2.drawY + 10 + player2.height > this.drawY && player2.drawX - player2.width / 2 - 3 <= this.drawX){
          this.xspeed = -this.xspeed;
          this.yspeed = -this.yspeed;
-
+        if (this.xspeed > 0)   this.xspeed = this.xspeed1;
+        else  this.xspeed = -this.xspeed1;
+        if (this.yspeed > 0) this.yspeed = this.yspeed1;
+        else this.yspeed = -this.yspeed1;
     }
+    //відбиття від першого плеєра
     if (player1.drawY - 10 < this.drawY && player1.drawY + 10 + player1.height > this.drawY && player1.drawX + player1.width + 10 >= this.drawX) {
         this.xspeed = -this.xspeed;
         this.yspeed = -this.yspeed;
+        if (this.xspeed > 0)   this.xspeed = this.xspeed2;
+        else  this.xspeed = -this.xspeed2;
+        if (this.yspeed > 0) this.yspeed = this.yspeed2;
+        else this.yspeed = -this.yspeed2;
     }
     if (this.drawX > canvasWidth) {
         this.dir = "STOP2";
     }
     if (this.drawX < 0) {
-        this.dir = "STOP1"
+        this.dir = "STOP1";
     }
     if (this.isSpace) {
         if (this.dir == "STOP1") {
@@ -134,10 +151,12 @@ Ball.prototype.update = function () {
     //удар об нижню стінку
     if (this.drawY>canvasHeight) {
         this.yspeed = -this.yspeed;
+        this.dir = "MOVE";
     }
     //удар об верхню стінку
     if (this.drawY<0){
         this.yspeed = -this.yspeed;
+        this.dir = "MOVE";
     }
     this.BallMove();
 }
@@ -146,16 +165,20 @@ Ball.prototype.BallMove= function () {
     if (this.dir == "MOVE") {
         this.drawX = this.drawX + this.xspeed;
         this.drawY = this.drawY + this.yspeed;
+        prevDir = "MOVE";
     }
     if (this.dir == "STOP1") {
+        if (prevDir!="STOP1") score2++;
         this.drawX = player1.width +14;
         this.drawY = player1.drawY + player1.height/2;
+        prevDir = "STOP1";
     }
     if (this.dir == "STOP2") {
+        if (prevDir!="STOP2") score1++;
         this.drawX = canvasWidth - player2.width - 14;
         this.drawY = player2.drawY + player2.height/2;
+        prevDir = "STOP2";
     }
-
 }
 
 
@@ -201,6 +224,78 @@ Player2.prototype.chooseDir = function () {
     }
 
 }
+Game.prototype.getStatus = function () {
+    return this.status;
+}
+Game.prototype.update = function () {
+    // clear scene
+    drawBackground();
+    drawScore();
+    if (score1 == winscore || score2 == winscore)  this.status = "OVER";
+    switch (this.getStatus()) {
+        //play
+        case "PLAY":
+            isPlaying = true;
+            if (this.isEnter) this.status = "PAUSE";
+            break;
+        // none
+        case "START":
+            if (this.isEnter) {isPlaying = true; this.status = "PLAY";}
+            this.showMsg('TENIS Game', 'Press Enter to play');
+            break;
+
+        // game over
+        case "OVER":
+            isPlaying = false;
+            if (score1 > score2) this.showMsg('Game Over', 'Press Enter to play again', 'Left player is WIN');
+            else this.showMsg('Game Over', 'Press Enter to play again', 'Right player is WIN');
+            if (this.isEnter) this.status = "PLAY";
+            score1 = 0;
+            score2 = 0;
+            break;
+
+        // pause
+        case "PAUSE":
+            if (this.isEnter) this.status = "PLAY";
+            isPlaying = false;
+            this.showMsg('Pause', 'Press Enter to continue');
+            break;
+    }
+}
+
+Game.prototype.showMsg = function(header, action, addition) {
+    // background
+    context.beginPath();
+    context.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    context.fillRect(0, 0, canvasWidth, canvasHeight);
+    context.closePath();
+
+    // top text
+    context.beginPath();
+    context.font = "normal normal 32px cursive";
+    context.fillStyle = '#FF0000';
+    context.textAlign = "center";
+    context.fillText(header, canvasWidth / 2, canvasHeight / 2);
+    context.closePath();
+
+    // middle text
+    context.beginPath();
+    context.font = "normal normal 14px monospace";
+    context.fillStyle = '#B22222';
+    context.textAlign = "center";
+    context.fillText(action, canvasWidth / 2, canvasHeight / 2 + 32);
+    context.closePath();
+    // bottom addition text
+    if (addition !== undefined) {
+        context.beginPath();
+        context.font = "normal normal 14px monospace";
+        context.fillStyle = '#B22222';
+        context.textAlign = "center";
+        context.fillText(addition, canvasWidth / 2, canvasHeight - 32);
+        context.closePath();
+    }
+
+}
 //Game Objects
 function Player1() {
     this.drawX = 0;
@@ -229,11 +324,29 @@ function Ball() {
     this.radius = 10;
     this.speed = 3;
     this.xspeed = 3;
-    this.yspeed = 5;
+    this.yspeed = 4;
+    this.xspeed1 = 4;
+    this.yspeed1 = 5;
+    this.xspeed2 = 3;
+    this.yspeed2 = 4;
     //direction
     this.dir = "MOVE";
     this.isSpace = false;
 }
+
+function Game() {
+    this.status = "START";
+    this.isEnter = false;
+}
+
+function drawScore() {
+    drawBackground();
+    context.fillStyle = "#fff";
+    var str1 = score1.toString() ;
+    var str2 = score2.toString();
+    context.fillText(str1 + " : " + str2, canvasWidth/2, 20);
+}
+
 
 //Clear functions
 function clearBallCtx() {
@@ -273,6 +386,10 @@ function checkKeyDown(e) {
         ball.isSpace = true;
         e.preventDefault();
     }
+    if (keyID == 13){
+        game.isEnter = true;
+        e.preventDefault();
+    }
 }
 
 function checkKeyUp(e) {
@@ -297,6 +414,10 @@ function checkKeyUp(e) {
     }
     if (keyID == 32){
         ball.isSpace = false;
+        e.preventDefault();
+    }
+    if (keyID == 13){
+        game.isEnter = false;
         e.preventDefault();
     }
 }
