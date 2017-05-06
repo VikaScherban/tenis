@@ -109,7 +109,7 @@ Ball.prototype.draw = function () {
     ballctx.arc(this.drawX, this.drawY, this.radius, 0, Math.PI*2, false);
     ballctx.closePath();
     ballctx.fill();
-}
+};
 
 Ball.prototype.update = function () {
     //відбиття від другого плеєра
@@ -159,7 +159,7 @@ Ball.prototype.update = function () {
         this.dir = "MOVE";
     }
     this.BallMove();
-}
+};
 
 Ball.prototype.BallMove= function () {
     if (this.dir == "MOVE") {
@@ -179,32 +179,32 @@ Ball.prototype.BallMove= function () {
         this.drawY = player2.drawY + player2.height/2;
         prevDir = "STOP2";
     }
-}
+};
 
 
 Player1.prototype.draw = function () {
     clearPlayer1Ctx();
     ctxPlayer1.drawImage(board, 400,400, 500, 300, //пов'язано з картинкою
         this.drawX,this.drawY, this.width, this.height);
-}
+};
 
 Player1.prototype.update = function () {
     if(this.drawY <= 3 ) this.drawY = 0;
     if (this.drawY > canvasHeight-100) this.drawY = canvasHeight-100;
     this.chooseDir();
-}
+};
 
 Player2.prototype.draw = function () {
     clearPlayer2Ctx();
     ctxPlayer2.drawImage(board, 400,400, 500, 300, //пов'язано з картинкою
         this.drawX,this.drawY, this.width, this.height);
-}
+};
 
 Player2.prototype.update = function () {
     if(this.drawY <= 3 ) this.drawY = 0;
     if (this.drawY > canvasHeight-100) this.drawY = canvasHeight-100;
     this.chooseDir();
-}
+};
 
 Player1.prototype.chooseDir =function () {
     if (this.isUp) {
@@ -213,7 +213,7 @@ Player1.prototype.chooseDir =function () {
     if (this.isDown) {
         this.drawY +=this.speed;
     }
-}
+};
 
 Player2.prototype.chooseDir = function () {
     if (this.isUp) {
@@ -223,10 +223,10 @@ Player2.prototype.chooseDir = function () {
         this.drawY +=this.speed;
     }
 
-}
+};
 Game.prototype.getStatus = function () {
     return this.status;
-}
+};
 Game.prototype.update = function () {
     // clear scene
     drawBackground();
@@ -261,7 +261,7 @@ Game.prototype.update = function () {
             this.showMsg('Pause', 'Press Enter to continue');
             break;
     }
-}
+};
 
 Game.prototype.showMsg = function(header, action, addition) {
     // background
@@ -295,7 +295,7 @@ Game.prototype.showMsg = function(header, action, addition) {
         context.closePath();
     }
 
-}
+};
 //Game Objects
 function Player1() {
     this.drawX = 0;
